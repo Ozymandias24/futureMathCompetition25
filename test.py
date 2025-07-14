@@ -28,64 +28,79 @@ def get_CircleUnit(n):
 n = int(input("Enter the number of angles: "))
 print(isFprime(n))
 
-tmp = get_CircleUnit(n)
-print(tmp)
+roots = get_CircleUnit(n)
+
 
 points = []
 obj = t.Turtle()
+screen = t.Screen()
 
 obj.hideturtle()
-obj.speed(0)
+obj.speed(0.1)
 obj.pensize(2)
 
-# x축
-obj.penup()
-obj.goto(-300, 0)
-obj.pendown()
-obj.goto(300, 0)
-
-# y축
-obj.penup()
-obj.goto(0, -300)
-obj.pendown()
-obj.goto(0, 300)
-
 # 축 레이블 추가
-obj.penup()
-obj.goto(310, -10)
-obj.write("Re", font=("Arial", 12, "bold"))
-obj.goto(10, 310)
-obj.write("Im", font=("Arial", 12, "bold"))
-obj.speed(1)
+def draw_axes():
+    obj.penup()
+    obj.goto(-300, 0)
+    obj.pendown()
+    obj.goto(300, 0)
+    obj.penup()
+    obj.goto(0, -300)
+    obj.pendown()
+    obj.goto(0, 300)
+    obj.penup()
+    obj.goto(310, -10)
+    obj.write("Re", font=("Arial", 12, "bold"))
+    obj.goto(10, 310)
+    obj.write("Im", font=("Arial", 12, "bold"))
+    obj.penup()
 
 obj.pensize(1)
 
-obj.penup()
-obj.goto(100, 0)
-
-obj.pendown()
-for i in tmp[1:]:
-    points.append((i.real*100, i.imag*100))
-    obj.goto(i.real*100, i.imag*100)
+def draw_polygon():
+    obj.penup()
+    start = roots[0]
+    obj.goto(start.real * 100, start.imag * 100)
+    obj.pendown()
+    for z in roots[1:] + [start]:
+        obj.goto(z.real * 100, z.imag * 100)
+    obj.penup()
     
-    
-    
-obj.goto(100, 0)
-obj.penup()
 
-for i in tmp:
-    x = i.real*100
-    y = i.imag*100
-    obj.goto(x, y)
-    obj.dot(5, "red")
-    obj.goto(x+10, y+10)
-    x /= 100
-    y /= 100
+mode = 0
 
-    obj.write(f"{x:.2f}, {y:.2f}i", font=("Arial", 10, "normal"))
+def draw_labels():
+    obj.clear()
+    draw_axes()
+    draw_polygon()
+    for k, z in enumerate(roots):
+        x = z.real * 100
+        y = z.imag * 100
+        obj.goto(x, y)
+        obj.dot(5, "red")
+        obj.goto(x + 10, y + 10)
+        if mode == 0:
+            label = f"({z.real:.2f}, {z.imag:.2f}i)"
+        elif mode == 1:
+            r = abs(z)
+            theta = cmath.phase(z)
+            label = f"{r:.2f}(cos({theta:.2f}) + i·sin({theta:.2f}))"
+        elif mode == 2:
+            label = f"e^({2*k}πi/{n})"
+        obj.write(label, font=("Arial", 10))
 
-obj.write(f"")
 
+def switch_mode():
+    global mode
+    mode = (mode + 1) % 3
+    draw_labels()
+
+draw_axes()
+draw_polygon()
+draw_labels()
+screen.listen()
+screen.onkey(switch_mode, "space")
 
 t.done()
 input("Press Enter to Exit...")
